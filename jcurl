@@ -1,0 +1,82 @@
+#! /usr/bin/env python
+import sys, json, subprocess
+import argparse
+from cStringIO import StringIO
+from pprint import pprint
+
+configuration = {
+  'json-data': True,
+  'pretty': sys.stdout.isatty(),
+  'header-accept': True
+ }
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--no-json-data', action='store_true')
+parser.add_argument('--no-pretty', action='store_true')
+parser.add_argument('--pretty', action='store_true')
+parser.add_argument('--no-accept', action='store_true')
+parser.add_argument('-d', '--data', action='append')
+parser.add_argument('--data-json', action='append')
+parsed_arguments = parser.parse_known_args(sys.argv[1:])
+
+options = parsed_arguments[0]
+
+if options.no_json_data:
+  configuration['json-data'] = False
+if options.pretty:
+  configuration['pretty'] = True
+if options.no_pretty:
+  configuration['pretty'] = False
+if options.no_accept:
+  configuration['header-accept'] = False
+
+pprint (options)
+# TODO reimplement -i, using -v.
+
+print json.dumps(configuration, indent=2)
+
+json_data = options.data_json or []
+
+if configuration['json-data']:
+    json_data.extend(options.data or [])
+    raw_data = []
+else:
+    raw_data = options.data or []
+
+curl_args = []
+if configuration['header-accept']:
+    curl_args.append("-H 'Accept: application/json'")
+
+for d in raw_data:
+    curl_args.append('-d '+d)
+
+pprint(parsed_arguments[1])
+curl_args.extend(parsed_arguments[1])
+
+pprint (curl_args)
+pprint(json_data)
+pprint (raw_data)
+
+
+input = sys.stdin
+err_out = sys.stderr
+output = sys.stdout
+# input
+
+
+curl_cmd = 'curl ' + ' '.join(curl_args)
+pprint(curl_cmd)
+
+exit_code = subprocess.call(
+  curl_cmd,
+  stdin=input,
+  stdout=output,
+  stderr=err_out,
+  shell=True)
+
+#output
+
+
+
+
+sys.exit(exit_code)

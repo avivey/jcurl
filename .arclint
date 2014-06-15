@@ -1,0 +1,33 @@
+{
+    "linters": {
+        "chmod": {
+            "type": "chmod"
+        },
+        "filename": {
+            "type": "filename"
+        },
+        "generated": {
+            "type": "generated"
+        },
+        "merge-conflict": {
+            "type": "merge-conflict"
+        },
+        "nolint": {
+            "type": "nolint"
+        },
+        "python pep8": {
+            "include": ["(\\.py$)", "(jcurl)"],
+            "severity": {
+                "E302": "advice",
+                "E303": "advice"
+            },
+            "type": "flake8"
+        },
+        "spelling": {
+            "type": "spelling"
+        },
+        "text": {
+            "type": "text"
+        }
+    }
+}
