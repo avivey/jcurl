@@ -1,20 +1,24 @@
 #! /usr/bin/env python
-import sys, json, subprocess
+import sys
+import json
 import argparse
-from cStringIO import StringIO
-from pprint import pprint
+import subprocess
 
 configuration = {
-  'json-data': True,
-  'pretty': sys.stdout.isatty(),
-  'header-accept': True
- }
+    'json-data': True,
+    'pretty': sys.stdout.isatty(),
+    'header-accept': True,
+    'header-content-type': True,
+    'silence': True,
+}
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--no-json-data', action='store_true')
 parser.add_argument('--no-pretty', action='store_true')
 parser.add_argument('--pretty', action='store_true')
+parser.add_argument('--no-silence', action='store_true')
 parser.add_argument('--no-accept', action='store_true')
+parser.add_argument('--no-content-type', action='store_true')
 parser.add_argument('-d', '--data', action='append')
 parser.add_argument('--data-json', action='append')
 parsed_arguments = parser.parse_known_args(sys.argv[1:])
@@ -22,20 +26,20 @@ parsed_arguments = parser.parse_known_args(sys.argv[1:])
 options = parsed_arguments[0]
 
 if options.no_json_data:
-  configuration['json-data'] = False
+    configuration['json-data'] = False
 if options.pretty:
-  configuration['pretty'] = True
+    configuration['pretty'] = True
 if options.no_pretty:
-  configuration['pretty'] = False
+    configuration['pretty'] = False
 if options.no_accept:
-  configuration['header-accept'] = False
-
-pprint (options)
-# TODO reimplement -i, using -v.
-
-print json.dumps(configuration, indent=2)
+    configuration['header-accept'] = False
+if options.no_content_type:
+    configuration['header-content-type'] = False
+if options.no_silence:
+    configuration['silence'] = False
 
 json_data = options.data_json or []
+curl_args = []
 
 if configuration['json-data']:
     json_data.extend(options.data or [])
@@ -43,40 +47,51 @@ if configuration['json-data']:
 else:
     raw_data = options.data or []
 
-curl_args = []
+if configuration['silence']:
+    curl_args.append('-sS')
+
 if configuration['header-accept']:
     curl_args.append("-H 'Accept: application/json'")
 
 for d in raw_data:
     curl_args.append('-d '+d)
 
-pprint(parsed_arguments[1])
+if json_data:
+    if configuration['header-content-type']:
+        curl_args.append("-H 'Content-Type: application/json'")
+    json_dict = {}
+    for d in json_data:
+        key_val = d.split('=', 2)
+        json_dict[key_val[0]] = key_val[1]
+    curl_args.append("--data-binary '%s'" % json.dumps(json_dict))
+
 curl_args.extend(parsed_arguments[1])
-
-pprint (curl_args)
-pprint(json_data)
-pprint (raw_data)
-
 
 input = sys.stdin
 err_out = sys.stderr
-output = sys.stdout
-# input
 
+if configuration['pretty']:
+    output = subprocess.PIPE
+else:
+    output = sys.stdout
 
 curl_cmd = 'curl ' + ' '.join(curl_args)
-pprint(curl_cmd)
 
-exit_code = subprocess.call(
-  curl_cmd,
-  stdin=input,
-  stdout=output,
-  stderr=err_out,
-  shell=True)
-
-#output
+subproc = subprocess.Popen(
+    curl_cmd,
+    stdin=input,
+    stdout=output,
+    stderr=err_out,
+    shell=True)
 
 
+if configuration['pretty']:
+    response, _ = subproc.communicate()
+    try:
+        result = json.loads(response)
+        json.dump(result, sys.stdout, indent=2)
+        print('')  # json.dump does not add final newline.
+    except ValueError:
+        sys.stdout.write(response)
 
-
-sys.exit(exit_code)
+sys.exit(subproc.returncode)
