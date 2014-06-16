@@ -1,4 +1,5 @@
 jcurl: JSON-oriented cURL wrapper
+=================================
 
 This is a small utility to make curl easier when working with JSON-based APIs.
 
@@ -11,7 +12,7 @@ It wraps calls to `curl`, with the following changes:
 
 
 Example:
-
+--------
   Before:
 
     ~$ curl graph.facebook.com
@@ -33,7 +34,7 @@ Example:
 
 
 Usage:
-
+------
   jcurl [options] [-- [curl_options]] [URL...]
 
   Any argument not understood by jcurl, and any argument after the first `--`,
@@ -64,13 +65,13 @@ Usage:
                         bar. Use this option to not add it.
 
 Gotchas:
-
+--------
   curl dumps the output of `-i` onto stdout, which breaks jcurl's ability to
   parse any json out of it. `-v` goes to stderr, so it will still work.
 
 
 Installation:
-
+-------------
   Just copy (or symlink) the `jcurl` file to ~/bin/jcurl (Or any other location
   in your PATH).
   Python is required.
@@ -78,6 +79,6 @@ Installation:
 
 
 TODO:
-
-- Support -i (by parsing either -i or -v).
-- Bash completions
+-----
+  - Support -i (by parsing either -i or -v).
+  - Bash completions
