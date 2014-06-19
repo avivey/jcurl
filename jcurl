@@ -3,6 +3,7 @@ import sys
 import json
 import argparse
 import subprocess
+import pipes
 
 configuration = {
     'json-data': True,
@@ -66,6 +67,7 @@ if json_data:
     curl_args.append("--data-binary '%s'" % json.dumps(json_dict))
 
 curl_args.extend(parsed_arguments[1])
+curl_args = map(pipes.quote, curl_args)
 
 input = sys.stdin
 err_out = sys.stderr
@@ -75,7 +77,8 @@ if configuration['pretty']:
 else:
     output = sys.stdout
 
-curl_cmd = 'curl ' + ' '.join(curl_args)
+curl_args.insert(0, 'curl')
+curl_cmd = ' '.join(curl_args)
 
 subproc = subprocess.Popen(
     curl_cmd,
