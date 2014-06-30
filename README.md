@@ -11,7 +11,7 @@ It wraps calls to `curl`, with the following changes:
 - If the response is valid json, pretty-print it; Else, just dump it as is.
 
 
-Example:
+Examples:
 --------
   Before:
 
@@ -31,6 +31,21 @@ Example:
     }
     ~$ <prompt>
 
+
+  Before:
+
+    ~$ curl -d '{"body": "Interesting",
+                "commit_id": "ffbddc02d52771608e000deec7797960f2199036",
+                "position": 30, "path": "index.html"}'               \
+            https://api.github.com/repos/avivey/jcurl/pulls/2/comments?access_token=...
+
+
+  After:
+
+    ~$ jcurl -d body=Interesting                                     \
+             -d commit_id=ffbddc02d52771608e000deec7797960f2199036   \
+             -d path=index.html -d position=30                       \
+             https://api.github.com/repos/avivey/jcurl/pulls/2/comments?access_token=...
 
 
 Usage:

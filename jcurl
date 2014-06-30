@@ -52,19 +52,28 @@ if configuration['silence']:
     curl_args.append('-sS')
 
 if configuration['header-accept']:
-    curl_args.append("-H 'Accept: application/json'")
+    curl_args.append('-H')
+    curl_args.append('Accept: application/json')
 
 for d in raw_data:
     curl_args.append('-d '+d)
 
+
+def maybe_json(string):
+    try:
+        return json.loads(string)
+    except:
+        return string
 if json_data:
     if configuration['header-content-type']:
-        curl_args.append("-H 'Content-Type: application/json'")
+        curl_args.append('-H')
+        curl_args.append('Content-Type: application/json')
     json_dict = {}
     for d in json_data:
         key_val = d.split('=', 2)
-        json_dict[key_val[0]] = key_val[1]
-    curl_args.append("--data-binary '%s'" % json.dumps(json_dict))
+        json_dict[key_val[0]] = maybe_json(key_val[1])
+    curl_args.append('--data-binary')
+    curl_args.append(json.dumps(json_dict))
 
 curl_args.extend(parsed_arguments[1])
 curl_args = map(pipes.quote, curl_args)
