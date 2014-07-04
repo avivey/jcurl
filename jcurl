@@ -56,7 +56,8 @@ if configuration['header-accept']:
     curl_args.append('Accept: application/json')
 
 for d in raw_data:
-    curl_args.append('-d '+d)
+    curl_args.append('-d')
+    curl_args.append(d)
 
 
 def maybe_json(string):
