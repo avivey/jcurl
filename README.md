@@ -10,7 +10,6 @@ It wraps calls to `curl`, with the following changes:
 - add "Accept: application/json" and "Content-Type: application/json".
 - If the response is valid json, pretty-print it; Else, just dump it as is.
 
-
 Examples:
 --------
   Before:
@@ -52,7 +51,7 @@ Examples:
 
 Usage:
 ------
-  jcurl [options] [-- [curl_options]] [URL...]
+  jcurl [options] [-- [curl_options]] URL...
 
   Any argument not understood by jcurl, and any argument after the first `--`,
   are passed directly to the `curl` command. These arguments will take precedent
@@ -81,12 +80,6 @@ Usage:
     --no-silence        jcurl adds `-sS` by default, to suppress the progress
                         bar. Use this option to not add it.
 
-Gotchas:
---------
-  curl dumps the output of `-i` onto stdout, which breaks jcurl's ability to
-  parse any json out of it. `-v` goes to stderr, so it will still work.
-
-
 Installation:
 -------------
   Just copy (or symlink) the `jcurl` file to ~/bin/jcurl (Or any other location
@@ -97,5 +90,4 @@ Installation:
 
 TODO:
 -----
-  - Support -i (by parsing either -i or -v).
   - Bash completions

@@ -11,6 +11,7 @@ configuration = {
     'header-accept': True,
     'header-content-type': True,
     'silence': True,
+    'include': False,
 }
 
 parser = argparse.ArgumentParser()
@@ -22,7 +23,9 @@ parser.add_argument('--no-accept', action='store_true')
 parser.add_argument('--no-content-type', action='store_true')
 parser.add_argument('-d', '--data', action='append')
 parser.add_argument('--data-json', action='append')
+parser.add_argument('-i', '--include', action='store_true')
 parsed_arguments = parser.parse_known_args(sys.argv[1:])
+# If any more arguments shows up, refactor this.
 
 options = parsed_arguments[0]
 
@@ -38,6 +41,8 @@ if options.no_content_type:
     configuration['header-content-type'] = False
 if options.no_silence:
     configuration['silence'] = False
+if options.include:
+    configuration['include'] = True
 
 json_data = options.data_json or []
 curl_args = []
@@ -55,6 +60,9 @@ if configuration['header-accept']:
     curl_args.append('-H')
     curl_args.append('Accept: application/json')
 
+if configuration['include']:
+    curl_args.append('--include')
+
 for d in raw_data:
     curl_args.append('-d')
     curl_args.append(d)
@@ -65,6 +73,7 @@ def maybe_json(string):
         return json.loads(string)
     except:
         return string
+
 if json_data:
     if configuration['header-content-type']:
         curl_args.append('-H')
@@ -100,10 +109,25 @@ subproc = subprocess.Popen(
 
 if configuration['pretty']:
     response, _ = subproc.communicate()
+
+    if configuration['include']:
+        def split_header_response(fulldata):
+            sep = '\r\n\r\n'  # This is the spec.
+            x = fulldata.split(sep, 2)
+            if len(x) < 2:
+                sep = '\n\n'
+                x = fulldata.split(sep, 2)
+            if len(x) < 2:
+                return '', fulldata
+            return x[0]+sep, x[1]
+
+        headers, response = split_header_response(response)
+
+        sys.stdout.write(headers)
     try:
         result = json.loads(response)
         json.dump(result, sys.stdout, indent=2)
-        print('')  # json.dump does not add final newline.
+        sys.stdout.write('\n')  # json.dump does not add final newline.
     except ValueError:
         sys.stdout.write(response)
 
