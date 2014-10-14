@@ -81,7 +81,10 @@ if json_data:
     json_dict = {}
     for d in json_data:
         key_val = d.split('=', 2)
-        json_dict[key_val[0]] = maybe_json(key_val[1])
+        if len(key_val) == 1:
+            json_dict = maybe_json(key_val[0])
+        else:
+            json_dict[key_val[0]] = maybe_json(key_val[1])
     curl_args.append('--data-binary')
     curl_args.append(json.dumps(json_dict))
 
